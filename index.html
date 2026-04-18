@@ -277,13 +277,13 @@
         ? String(degrees).padStart(2, "0")
         : String(degrees).padStart(3, "0");
       const minText = minutes.toFixed(3).padStart(6, "0");
-      return `${dir} ${degText}° ${minText}`;
+      return ${dir} ${degText}° ${minText};
     }
 
     function updateCoordinateDisplay() {
       const center = map.getCenter();
       coordText.innerHTML =
-        `${toGeocacheCoord(center.lat, true)}<br>${toGeocacheCoord(center.lng, false)}`;
+        ${toGeocacheCoord(center.lat, true)}<br>${toGeocacheCoord(center.lng, false)};
     }
 
     function distanceInMeters(lat1, lon1, lat2, lon2) {
@@ -361,4 +361,29 @@
         hintBox.textContent = "Hinweis: Gut gemacht. Du kannst jetzt mit Rätsel 2 weitermachen.";
         nextPuzzle.style.display = "block";
       } else {
-        resultBox.textContent = "Noch nicht richtig – prüfe Position und Zooms
+        resultBox.textContent = "Noch nicht richtig – prüfe Position und Zoomstufe.";
+        resultBox.className = "result-box fail";
+        hintBox.textContent = "Hinweis: Nutze Koordinateneingabe oder + und - für die Zoomstufe.";
+        nextPuzzle.style.display = "none";
+      }
+    }
+
+    zoomInButton.addEventListener("click", function () {
+      map.zoomIn();
+    });
+
+    zoomOutButton.addEventListener("click", function () {
+      map.zoomOut();
+    });
+
+    applyCoordButton.addEventListener("click", applyCoordinates);
+    checkButton.addEventListener("click", checkSolution);
+
+    map.on("move", updateCoordinateDisplay);
+    map.on("zoom", updateCoordinateDisplay);
+
+    updateCoordinateDisplay();
+  </script>
+
+</body>
+</html>
