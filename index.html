@@ -452,17 +452,6 @@ Test Baer von Bernegg
         feedback.style.color = "#ffd3a6";
       }
     });
-    
-  function toGeocacheCoord(value, isLat) {
-    const dir = isLat ? (value >= 0 ? 'N' : 'S') : (value >= 0 ? 'E' : 'W');
-    const abs = Math.abs(value);
-    const degrees = Math.floor(abs);
-    const minutes = (abs - degrees) * 60;
-    const degText = isLat
-      ? String(degrees).padStart(2, '0')
-      : String(degrees).padStart(3, '0');
-
-    return ${dir} ${degText}° ${minutes.toFixed(3)};
   }
   </script>
 </body>
