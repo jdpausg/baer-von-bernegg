@@ -1,241 +1,37 @@
-Test123
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bär von Bernegg</title>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #111;
-      color: #f2f2f2;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      padding: 20px;
-    }
-
-    .stage-panel {
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 16px;
-      background: #1b1b1b;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
-    }
-
-    h1 {
-      margin: 0 0 12px 0;
-      text-align: center;
-      font-size: 28px;
-    }
-
-    .meta-line {
-      margin-bottom: 12px;
-      padding: 10px 14px;
-      background: #252525;
-      color: #e8e8e8;
-      border-radius: 10px;
-      font-size: 15px;
-      text-align: center;
-    }
-
-    .hint-box {
-      margin-bottom: 12px;
-      padding: 12px 14px;
-      background: #2a2a2a;
-      color: #ffd86b;
-      border-left: 4px solid #ffd86b;
-      border-radius: 10px;
-      font-size: 16px;
-      line-height: 1.45;
-    }
-
-    #map {
-      width: 100%;
-      height: 520px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #444;
-      margin-bottom: 14px;
-      background: #d8d8d8;
-    }
-
-    .coord-box {
-      margin: 0 auto 14px auto;
-      padding: 12px 16px;
-      background: #111;
-      color: #fff;
-      border: 1px solid #555;
-      border-radius: 12px;
-      font-size: 22px;
-      line-height: 1.5;
-      text-align: center;
-      width: fit-content;
-      min-width: 260px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-    }
-
-    .coord-title {
-      font-size: 13px;
-      color: #bbb;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .controls {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    button {
-      padding: 12px 18px;
-      border: none;
-      border-radius: 10px;
-      background: #2f7d32;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #256628;
-    }
-
-    .result-box {
-      min-height: 24px;
-      text-align: center;
-      font-size: 17px;
-      font-weight: bold;
-      margin-top: 4px;
-    }
-
-    .success {
-      color: #7CFC8A;
-    }
-
-    .fail {
-      color: #ff8f8f;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <title>Geocache Verification</title>
+    <style>
+        #map { height: 400px; }
+    </style>
 </head>
 <body>
-
-  <div class="stage-panel">
-    <h1>Bär von Bernegg</h1>
-
-    <div class="meta-line">
-      Erster Fund des Bär von Bernegg: <strong>5. Januar 2013</strong>
-    </div>
-
-    <div id="hintBox" class="hint-box">
-      Hinweis: Stelle die Karte auf die richtige Position ein und beachte die passende Zoomstufe.
-    </div>
+    <h1>Geocache Verification</h1>
+    <label for="coordinates">Enter Coordinates (N/S DD° MM.MMM, E/W DDD° MM.MMM):</label>
+    <input type="text" id="coordinates" placeholder="N 00° 00.000, E 000° 00.000">
+    <button id="verifyBtn">Verify</button>
+    <button id="nextPuzzleBtn" style="display:none;" onclick="window.location.href='bear-von-bernegg-2';">Next Puzzle</button>
 
     <div id="map"></div>
 
-    <div class="coord-box">
-      <div class="coord-title">Koordinaten</div>
-      <div id="coordText">N 00° 00.000<br>E 000° 00.000</div>
-    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
 
-    <div class="controls">
-      <button id="checkButton">Prüfen</button>
-    </div>
-
-    <div id="resultBox" class="result-box"></div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const coordText = document.getElementById("coordText");
-    const resultBox = document.getElementById("resultBox");
-    const checkButton = document.getElementById("checkButton");
-    const hintBox = document.getElementById("hintBox");
-
-    const targetLat = 47.299966;
-    const targetLng = 8.812700;
-    const targetZoom = 15;
-
-    const startLat = 47.3769;
-    const startLng = 8.5417;
-    const startZoom = 11;
-
-    const map = L.map("map").setView([startLat, startLng], startZoom);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
-
-    setTimeout(function () {
-      map.invalidateSize();
-    }, 300);
-
-    function toGeocacheCoord(value, isLat) {
-      const dir = isLat ? (value >= 0 ? "N" : "S") : (value >= 0 ? "E" : "W");
-      const abs = Math.abs(value);
-      const degrees = Math.floor(abs);
-      const minutes = (abs - degrees) * 60;
-      const degText = isLat
-        ? String(degrees).padStart(2, "0")
-        : String(degrees).padStart(3, "0");
-      const minText = minutes.toFixed(3).padStart(6, "0");
-      return `${dir} ${degText}° ${minText}`;
-    }
-
-    function updateCoordinateDisplay() {
-      const center = map.getCenter();
-      coordText.innerHTML =
-        `${toGeocacheCoord(center.lat, true)}<br>${toGeocacheCoord(center.lng, false)}`;
-    }
-
-    function distanceInMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371000;
-      const toRad = value => value * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    function checkSolution() {
-      const center = map.getCenter();
-      const zoom = map.getZoom();
-      const distance = distanceInMeters(center.lat, center.lng, targetLat, targetLng);
-
-      if (distance <= 20 && zoom === targetZoom) {
-        resultBox.textContent = "Richtig – Position und Zoomstufe stimmen.";
-        resultBox.className = "result-box success";
-        hintBox.textContent = "Hinweis: Gut gemacht. Diese Stufe ist gelöst.";
-      } else {
-        resultBox.textContent = "Noch nicht richtig – prüfe Position und Zoomstufe.";
-        resultBox.className = "result-box fail";
-        hintBox.textContent = "Hinweis: Die Kartenmitte muss stimmen, und auch die Zoomstufe ist wichtig.";
-      }
-    }
-
-    map.on("move", updateCoordinateDisplay);
-    map.on("zoom", updateCoordinateDisplay);
-
-    checkButton.addEventListener("click", checkSolution);
-
-    updateCoordinateDisplay();
-  </script>
-
+        document.getElementById('verifyBtn').onclick = function() {
+            var coords = document.getElementById('coordinates').value;
+            var regex = /^(N|S)\s(\d{1,2})°\s(\d{1,2}\.\d{1,3})\s,(E|W)\s(\d{1,3})°\s(\d{1,2}\.\d{1,3})$/;
+            if (regex.test(coords)) {
+                document.getElementById('nextPuzzleBtn').style.display = 'block';
+            } else {
+                alert('Please enter valid coordinates.');
+            }
+        };
+    </script>
 </body>
 </html>
