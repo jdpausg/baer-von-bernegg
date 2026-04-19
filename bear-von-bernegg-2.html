@@ -245,8 +245,8 @@
     </div>
 
     <div class="input-panel">
-      <input id="latInput" type="text" placeholder="N47 26.154">
-      <input id="lngInput" type="text" placeholder="E008 35.988">
+     <input id="latInput" type="text" placeholder="z. B. N47 00.000">
+<input id="lngInput" type="text" placeholder="z. B. E008 00.000">
       <button id="applyCoordButton">Koordinaten übernehmen</button>
     </div>
 
@@ -386,7 +386,7 @@
       const lng = parseGeoInput(lngInput.value, false);
 
       if (lat === null || lng === null) {
-        resultBox.textContent = "Eingabe nicht erkannt. Bitte z. B. N47 26.154 und E008 35.988 eingeben.";
+        resultBox.textContent = "Eingabe nicht erkannt. Bitte im Format N47 00.000 und E008 00.000 eingeben.";
         resultBox.className = "result-box fail";
         nextPuzzle.style.display = "none";
         return;
