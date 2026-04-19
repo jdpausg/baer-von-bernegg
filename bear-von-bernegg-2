@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rätsel 2 – Alten Cache suchen</title>
-  //unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>Bär von Bernegg – Rätsel 2</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     html, body {
@@ -18,26 +18,31 @@
 
     body {
       padding: 20px;
-      background-image: linear-gradient(rgba(17,17,17,0.78), rgba(17,17,17,0.88)), url("selected_image_5814268761206476105.jpg");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
     }
 
     .stage-panel {
-      max-width: 920px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 16px;
-      background: rgba(27, 27, 27, 0.92);
+      background: #1b1b1b;
       border-radius: 14px;
       box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
-      backdrop-filter: blur(2px);
     }
 
     h1 {
       margin: 0 0 12px 0;
       text-align: center;
       font-size: 28px;
+    }
+
+    .meta-line {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      background: #252525;
+      color: #e8e8e8;
+      border-radius: 10px;
+      font-size: 15px;
+      text-align: center;
     }
 
     .hint-box {
@@ -51,14 +56,103 @@
       line-height: 1.45;
     }
 
+    .input-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .input-panel input {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #555;
+      background: #101010;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .input-panel button {
+      white-space: nowrap;
+    }
+
+    #mapWrap {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
     #map {
       width: 100%;
       height: 520px;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid #444;
-      margin-bottom: 14px;
       background: #d8d8d8;
+    }
+
+    .map-image-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.35);
+      pointer-events: none;
+    }
+
+    .map-image-overlay.hidden {
+      display: none;
+    }
+
+    .map-image-overlay img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.88;
+    }
+
+    .map-image-text {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.72);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .zoom-buttons {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .zoom-buttons button {
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(20, 20, 20, 0.9);
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .zoom-buttons button:hover {
+      background: rgba(47, 125, 50, 0.95);
     }
 
     .coord-box {
@@ -129,21 +223,51 @@
       text-align: center;
       margin-top: 14px;
     }
+
+    @media (max-width: 760px) {
+      .input-panel {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
 
   <div class="stage-panel">
-    <h1>Rätsel 2 – Alten Cache suchen</h1>
+    <h1>Bär von Bernegg – Rätsel 2</h1>
+
+    <div class="meta-line">
+      Alten Cache suchen
+    </div>
 
     <div id="hintBox" class="hint-box">
       Hinweis: Verwende Projekt GC zum Herausfinden der Koordinaten.
     </div>
 
-    <div id="map"></div>
+    <div class="input-panel">
+      <input id="latInput" type="text" placeholder="N47 26.154">
+      <input id="lngInput" type="text" placeholder="E008 35.988">
+      <button id="applyCoordButton">Koordinaten übernehmen</button>
+    </div>
+
+    <div id="mapWrap">
+      <div id="map"></div>
+
+      <div id="mapImageOverlay" class="map-image-overlay">
+        <img src="1000005924.jpg" alt="Hinweisbild für Rätsel 2">
+        <div class="map-image-text">
+          Hinweisbild – verschwindet nach der Koordinateneingabe.
+        </div>
+      </div>
+
+      <div class="zoom-buttons">
+        <button id="zoomInButton" type="button">+</button>
+        <button id="zoomOutButton" type="button">−</button>
+      </div>
+    </div>
 
     <div class="coord-box">
-      <div class="coord-title">Koordinaten</div>
+      <div class="coord-title">Aktuelle Kartenmitte</div>
       <div id="coordText">N 00° 00.000<br>E 000° 00.000</div>
     </div>
 
@@ -153,93 +277,4 @@
 
     <div id="resultBox" class="result-box"></div>
 
-    <div id="nextPuzzle">
-      <a class="next-link" href="raetsel3.html">Weiter zu Rätsel 3</a>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const coordText = document.getElementById("coordText");
-    const resultBox = document.getElementById("resultBox");
-    const checkButton = document.getElementById("checkButton");
-    const hintBox = document.getElementById("hintBox");
-    const nextPuzzle = document.getElementById("nextPuzzle");
-
-    const targetLat = 47.435900;
-    const targetLng = 8.599967;
-    const targetZoom = 14;
-
-    const startLat = 47.3769;
-    const startLng = 8.5417;
-    const startZoom = 11;
-
-    const map = L.map("map").setView([startLat, startLng], startZoom);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
-
-    setTimeout(function () {
-      map.invalidateSize();
-    }, 300);
-
-    function toGeocacheCoord(value, isLat) {
-      const dir = isLat ? (value >= 0 ? "N" : "S") : (value >= 0 ? "E" : "W");
-      const abs = Math.abs(value);
-      const degrees = Math.floor(abs);
-      const minutes = (abs - degrees) * 60;
-      const degText = isLat
-        ? String(degrees).padStart(2, "0")
-        : String(degrees).padStart(3, "0");
-      const minText = minutes.toFixed(3).padStart(6, "0");
-      return `${dir} ${degText}° ${minText}`;
-    }
-
-    function updateCoordinateDisplay() {
-      const center = map.getCenter();
-      coordText.innerHTML =
-        `${toGeocacheCoord(center.lat, true)}<br>${toGeocacheCoord(center.lng, false)}`;
-    }
-
-    function distanceInMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371000;
-      const toRad = value => value * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    function checkSolution() {
-      const center = map.getCenter();
-      const zoom = map.getZoom();
-      const distance = distanceInMeters(center.lat, center.lng, targetLat, targetLng);
-
-      if (distance <= 20 && zoom === targetZoom) {
-        resultBox.textContent = "Richtig – Position und Zoomstufe stimmen.";
-        resultBox.className = "result-box success";
-        hintBox.textContent = "Hinweis: Gut gemacht. Du kannst jetzt mit Rätsel 3 weitermachen.";
-        nextPuzzle.style.display = "block";
-      } else {
-        resultBox.textContent = "Noch nicht richtig – prüfe Position und Zoomstufe.";
-        resultBox.className = "result-box fail";
-        hintBox.textContent = "Hinweis: Verwende Projekt GC zum Herausfinden der Koordinaten.";
-        nextPuzzle.style.display = "none";
-      }
-    }
-
-    map.on("move", updateCoordinateDisplay);
-    map.on("zoom", updateCoordinateDisplay);
-    checkButton.addEventListener("click", checkSolution);
-
-    updateCoordinateDisplay();
-  </script>
-
-</body>
-</html>
+    <div id="nextPuzz
