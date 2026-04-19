@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koordinatensystem</title>
     <link rel="stylesheet" href="styles.css">
-    <title>Restored Design</title>
 </head>
 <body>
-    <div class="hint-box">Hinweis: Bitte beachten Sie die Koordinatenanzeige.</div>
-    <div class="coordinate-display">Koordinaten: [x, y]</div>
-    <h1>Willkommen zur alten Design-Version</h1>
-    <p>Hier ist der originale Inhalt der Webseite ohne die "Test123"-Zeile.</p>
-    <!-- Add additional content as needed -->
+    <header>
+        <h1>Koordinaten-Converter</h1>
+    </header>
+    <div class="container">
+        <div class="hint-box">Bitte geben Sie die Koordinaten ein.</div>
+        <input type="text" id="coordinates" placeholder="z.B. 50.12345, 8.12345">
+        <button id="convert">Prüfen</button>
+        <div id="map"></div>
+        <div id="coordinate-display"></div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
