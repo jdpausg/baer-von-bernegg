@@ -229,6 +229,80 @@
         grid-template-columns: 1fr;
       }
     }
+    <style>
+  body {
+    margin: 0;
+    background: #111;
+    color: white;
+  }
+
+  #mapWrap {
+    position: relative;
+  }
+
+  #map {
+    height: 420px;
+    width: 100%;
+  }
+
+  .result-box {
+    margin-top: 12px;
+  }
+
+  /* HIER EINFÜGEN */
+  .center-crosshair {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 46px;
+    height: 46px;
+    transform: translate(-50%, -50%);
+    z-index: 900;
+    pointer-events: none;
+  }
+
+  .crosshair-ring {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45);
+  }
+
+  .crosshair-h {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 50%;
+    height: 2px;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  }
+
+  .crosshair-v {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  }
+
+  .crosshair-dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+    background: #22c55e;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+  }
+</style>
   </style>
 </head>
 <body>
@@ -252,6 +326,12 @@
 
     <div id="mapWrap">
       <div id="map"></div>
+      <div class="center-crosshair" aria-hidden="true">
+  <div class="crosshair-ring"></div>
+  <div class="crosshair-h"></div>
+  <div class="crosshair-v"></div>
+  <div class="crosshair-dot"></div>
+</div>
 
       <div id="mapImageOverlay" class="map-image-overlay">
         <img src="./ee3a5e77-88c2-4ff1-b466-3ee8c3d101a1_l.jpeg" alt="Hinweisbild für Rätsel 2">
@@ -408,34 +488,33 @@
     resultBox.className = "result-box";
   }
 
-  function checkSolution() {
-    const normalizedLatInput = normalizeGeoInput(latInput.value);
-    const normalizedLngInput = normalizeGeoInput(lngInput.value);
-    const currentZoom = map.getZoom();
-    const center = map.getCenter();
+ function checkSolution() {
+  const normalizedLatInput = normalizeGeoInput(latInput.value);
+  const normalizedLngInput = normalizeGeoInput(lngInput.value);
+  const currentZoom = map.getZoom();
 
-    const exactInputMatch =
-      normalizedLatInput === normalizeGeoInput(targetLatInput) &&
-      normalizedLngInput === normalizeGeoInput(targetLngInput);
+  const exactInputMatch =
+    normalizedLatInput === normalizeGeoInput(targetLatInput) &&
+    normalizedLngInput === normalizeGeoInput(targetLngInput);
 
-    const mapMatches =
-      lastAppliedLat !== null &&
-      lastAppliedLng !== null &&
-      Math.abs(center.lat - targetLat) < 0.0000001 &&
-      Math.abs(center.lng - targetLng) < 0.0000001;
+  const mapMatches =
+    lastAppliedLat !== null &&
+    lastAppliedLng !== null &&
+    Math.abs(lastAppliedLat - targetLat) < 0.0000001 &&
+    Math.abs(lastAppliedLng - targetLng) < 0.0000001;
 
-    if (lastInputAccepted && exactInputMatch && mapMatches && currentZoom === targetZoom) {
-      resultBox.textContent = "Richtig – exakte Koordinaten eingegeben und Zoomstufe stimmt.";
-      resultBox.className = "result-box success";
-      hintBox.textContent = "Hinweis: Gut gemacht. Du kannst jetzt mit Rätsel 3 weitermachen.";
-      nextPuzzle.style.display = "block";
-    } else {
-      resultBox.textContent = "Noch nicht richtig – Koordinaten müssen exakt stimmen und die Zoomstufe muss 14 sein.";
-      resultBox.className = "result-box fail";
-      hintBox.textContent = "Hinweis: Verwende Projekt GC zum Herausfinden der Koordinaten.";
-      nextPuzzle.style.display = "none";
-    }
+  if (lastInputAccepted && exactInputMatch && mapMatches && currentZoom === targetZoom) {
+    resultBox.textContent = "Richtig – exakte Koordinaten eingegeben und Zoomstufe stimmt.";
+    resultBox.className = "result-box success";
+    hintBox.textContent = "Hinweis: Gut gemacht. Du kannst jetzt mit Rätsel 3 weitermachen.";
+    nextPuzzle.style.display = "block";
+  } else {
+    resultBox.textContent = "Noch nicht richtig – Koordinaten müssen exakt stimmen und die Zoomstufe muss 14 sein.";
+    resultBox.className = "result-box fail";
+    hintBox.textContent = "Hinweis: Verwende Projekt GC zum Herausfinden der Koordinaten.";
+    nextPuzzle.style.display = "none";
   }
+}
 
   zoomInButton.addEventListener("click", function () {
     map.zoomIn();
