@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bär von Bernegg – Rätsel 3</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: #f2f2f2;
+      font-family: Arial, sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      padding: 20px;
+    }
+
+    .stage-panel {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px;
+      background: #1b1b1b;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    h1 {
+      margin: 0 0 12px 0;
+      text-align: center;
+      font-size: 28px;
+    }
+
+    .meta-line {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      background: #252525;
+      color: #e8e8e8;
+      border-radius: 10px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .hint-box {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      background: #2a2a2a;
+      color: #ffd86b;
+      border-left: 4px solid #ffd86b;
+      border-radius: 10px;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .input-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .input-panel input {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #555;
+      background: #101010;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .input-panel button {
+      white-space: nowrap;
+    }
+
+    #mapWrap {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    #map {
+      width: 100%;
+      height: 520px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #444;
+      background: #d8d8d8;
+    }
+
+    .map-image-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.35);
+      pointer-events: none;
+    }
+
+    .map-image-overlay.hidden {
+      display: none;
+    }
+
+    .map-image-overlay img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.88;
+    }
+
+    .map-image-text {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.72);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .zoom-buttons {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .zoom-buttons button {
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(20, 20, 20, 0.9);
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .zoom-buttons button:hover {
+      background: rgba(47, 125, 50, 0.95);
+    }
+
+    .coord-box {
+      margin: 0 auto 14px auto;
+      padding: 12px 16px;
+      background: #111;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 12px;
+      font-size: 22px;
+      line-height: 1.5;
+      text-align: center;
+      width: fit-content;
+      min-width: 260px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .coord-title {
+      font-size: 13px;
+      color: #bbb;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    button, .next-link {
+      display: inline-block;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #2f7d32;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    button:hover, .next-link:hover {
+      background: #256628;
+    }
+
+    .result-box {
+      min-height: 24px;
+      text-align: center;
+      font-size: 17px;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .success {
+      color: #7CFC8A;
+    }
+
+    .fail {
+      color: #ff8f8f;
+    }
+
+    #nextPuzzle {
+      display: none;
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .input-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .center-crosshair {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 46px;
+      height: 46px;
+      transform: translate(-50%, -50%);
+      z-index: 900;
+      pointer-events: none;
+    }
+
+    .crosshair-ring {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45);
+    }
+
+    .crosshair-h {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      top: 50%;
+      height: 2px;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+    }
+
+    .crosshair-v {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+    }
+
+    .crosshair-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      transform: translate(-50%, -50%);
+      background: #22c55e;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stage-panel">
+    <h1>Bär von Bernegg – Rätsel 3</h1>
+
+    <div class="meta-line">
+      Bär in der Höhe
+    </div>
+
+    <div id="hintBox" class="hint-box">
+      Hinweis: Verwende Projekt GC zum Herausfinden der Koordinaten.
+    </div>
+
+    <div class="input-panel">
+      <input id="latInput" type="text" placeholder="z. B. N47 00.000">
+      <input id="lngInput" type="text" placeholder="z. B. E009 00.000">
+      <button id="applyCoordButton">Koordinaten übernehmen</button>
+    </div>
+
+    <div id="mapWrap">
+      <div id="map"></div>
+
+      <div class="center-crosshair" aria-hidden="true">
+        <div class="crosshair-ring"></div>
+        <div class="crosshair-h"></div>
+        <div class="crosshair-v"></div>
+        <div class="crosshair-dot"></div>
+      </div>
+
+      <div id="mapImageOverlay" class="map-image-overlay">
+        <img src="./a89f97f5-acf7-4e98-99c4-a0bef2cbee84_l.jpg" alt="Hinweisbild für Rätsel 3">
+        <div class="map-image-text">
+          Hinweisbild – verschwindet nach der Koordinateneingabe.
+        </div>
+      </div>
+
+      <div class="zoom-buttons">
+        <button id="zoomInButton" type="button">+</button>
+        <button id="zoomOutButton" type="button">−</button>
+      </div>
+    </div>
+
+    <div class="coord-box">
+      <div class="coord-title">Aktuelle Kartenmitte</div>
+      <div id="coordText">N 00° 00.000<br>E 000° 00.000</div>
+    </div>
+
+    <div class="controls">
+      <button id="checkButton">Prüfen</button>
+    </div>
+
+    <div id="resultBox" class="result-box"></div>
+
+    <div id="nextPuzzle">
+      <a class="next-link" href="baer-von-bernegg-4.html">Weiter zu Rätsel 4</a>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const coordText = document.getElementById("coordText");
+    const resultBox = document.getElementById("resultBox");
+    const checkButton = document.getElementById("checkButton");
+    const hintBox = document.getElementById("hintBox");
+    const nextPuzzle = document.getElementById("nextPuzzle");
+    const latInput = document.getElementById("latInput");
+    const lngInput = document.getElementById("lngInput");
+    const applyCoordButton = document.getElementById("applyCoordButton");
+    const zoomInButton = document.getElementById("zoomInButton");
+    const zoomOutButton = document.getElementById("zoomOutButton");
+    const mapImageOverlay = document.getElementById("mapImageOverlay");
+
+    const targetLatInput = "N47 00.321";
+    const targetLngInput = "E009 00.564";
+    const targetZoom = 13;
+
+    const targetLat = 47 + (0.321 / 60);
+    const targetLng = 9 + (0.564 / 60);
+
+    const startLat = 47.3769;
+    const startLng = 8.5417;
+    const startZoom = 10;
+
+    let lastAppliedLat = null;
+    let lastAppliedLng = null;
+    let lastInputAccepted = false;
+
+    const map = L.map("map", { zoomControl: false }).setView([startLat, startLng], startZoom);
+
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 18,
+      attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+    }).addTo(map);
+
+    setTimeout(function () {
+      map.invalidateSize();
+    }, 300);
+
+    function toGeocacheCoord(value, isLat) {
+      const dir = isLat ? (value >= 0 ? "N" : "S") : (value >= 0 ? "E" : "W");
+      const abs = Math.abs(value);
+      const degrees = Math.floor(abs);
+      const minutes = (abs - degrees) * 60;
+      const degText = isLat
+        ? String(degrees).padStart(2, "0")
+        : String(degrees).padStart(3, "0");
+      const minText = minutes.toFixed(3).padStart(6, "0");
+      return `${dir} ${degText}° ${minText}`;
+    }
+
+    function updateCoordinateDisplay() {
+      const center = map.getCenter();
+      coordText.innerHTML =
+        `${toGeocacheCoord(center.lat, true)}<br>${toGeocacheCoord(center.lng, false)}`;
+    }
+
+    function normalizeGeoInput(text) {
+      return text
+        .toUpperCase()
+        .replace(/,/g, ".")
+        .replace(/°/g, " ")
+        .replace(/'/g, " ")
+        .replace(/"/g, " ")
+        .replace(/s+/g, " ")
+        .trim();
+    }
+
+    function parseGeoInput(text, isLat) {
+      if (!text) return null;
+
+      const cleaned = normalizeGeoInput(text);
+      const dirMatch = cleaned.match(/^[NSEW]/);
+      if (!dirMatch) return null;
+
+      const dir = dirMatch[0];
+      const rest = cleaned.substring(1).trim();
+      const parts = rest.split(" ");
+
+      if (parts.length < 2) return null;
+
+      const degrees = parseInt(parts[0], 10);
+      const minutes = parseFloat(parts[1]);
+
+      if (isNaN(degrees) || isNaN(minutes)) return null;
+      if (minutes < 0 || minutes >= 60) return null;
+
+      if (isLat && !["N", "S"].includes(dir)) return null;
+      if (!isLat && !["E", "W"].includes(dir)) return null;
+
+      let decimal = degrees + (minutes / 60);
+
+      if (dir === "S" || dir === "W") {
+        decimal = -decimal;
+      }
+
+      if (isLat && (decimal < -90 || decimal > 90)) return null;
+      if (!isLat && (decimal < -180 || decimal > 180)) return null;
+
+      return decimal;
+    }
+
+    function applyCoordinates() {
+      const lat = parseGeoInput(latInput.value, true);
+      const lng = parseGeoInput(lngInput.value, false);
+
+      if (lat === null || lng === null) {
+        lastInputAccepted = false;
+        resultBox.textContent = "Eingabe nicht erkannt. Bitte im Format N47 00.000 und E009 00.000 eingeben.";
+        resultBox.className = "result-box fail";
+        nextPuzzle.style.display = "none";
+        return;
+      }
+
+      lastAppliedLat = lat;
+      lastAppliedLng = lng;
+      lastInputAccepted = true;
+
+      map.setView([lat, lng], map.getZoom());
+      updateCoordinateDisplay();
+      mapImageOverlay.classList.add("hidden");
+      resultBox.textContent = "Koordinaten übernommen.";
+      resultBox.className = "result-box";
+    }
+
+    function checkSolution() {
+      const normalizedLatInput = normalizeGeoInput(latInput.value);
+      const normalizedLngInput = normalizeGeoInput(lngInput.value);
+      const currentZoom = map.getZoom();
+
+      const exactInputMatch =
+        normalizedLatInput === normalizeGeoInput(targetLatInput) &&
+        normalizedLngInput === normalizeGeoInput(targetLngInput);
+
+      const mapMatches =
+        lastAppliedLat !== null &&
+        lastAppliedLng !== null &&
+        Math.abs(lastAppliedLat - targetLat) < 0.0000001 &&
+        Math.abs(lastAppliedLng - targetLng) < 0.0000001;
+
+      if (lastInputAccepted && exactInputMatch && mapMatches && currentZoom === targetZoom) {
+        resultBox.textContent = "Richtig – exakte Koordinaten eingegeben und Zoomstufe stimmt.";
+        resultBox.className = "result-box success";
+        hintBox.textContent = "Hinweis: Gut gemacht. Du kannst jetzt mit Rätsel 4 weitermachen.";
+        nextPuzzle.style.display = "block";
+      } else {
+        resultBox.textContent = "Noch nicht richtig – Koordinaten müssen exakt stimmen und die Zoomstufe muss 13 sein.";
+        resultBox.className = "result-box fail";
+        hintBox.textContent = "Hinweis: Verwende Projekt GC zum Herausfinden der Koordinaten.";
+        nextPuzzle.style.display = "none";
+      }
+    }
+
+    zoomInButton.addEventListener("click", function () {
+      map.zoomIn();
+    });
+
+    zoomOutButton.addEventListener("click", function () {
+      map.zoomOut();
+    });
+
+    applyCoordButton.addEventListener("click", applyCoordinates);
+    checkButton.addEventListener("click", checkSolution);
+
+    map.on("move", updateCoordinateDisplay);
+    map.on("zoom", updateCoordinateDisplay);
+
+    updateCoordinateDisplay();
+  </script>
+
+</body>
+</html>
