@@ -313,7 +313,7 @@
       const dirMatch = cleaned.match(/[NSEW]/);
       const dir = dirMatch ? dirMatch[0] : null;
 
-      const numbers = cleaned.match(/d+(?:.d+)?/g);
+      const numbers = cleaned.match(/\d+(?:\.\d+)?/g);
       if (!numbers || numbers.length < 2) return null;
 
       const degrees = parseInt(numbers[0], 10);
