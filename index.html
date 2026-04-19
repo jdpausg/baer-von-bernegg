@@ -277,13 +277,13 @@
         ? String(degrees).padStart(2, "0")
         : String(degrees).padStart(3, "0");
       const minText = minutes.toFixed(3).padStart(6, "0");
-      return ${dir} ${degText}° ${minText};
+      return `${dir} ${degText}° ${minText}`;
     }
 
     function updateCoordinateDisplay() {
       const center = map.getCenter();
       coordText.innerHTML =
-        ${toGeocacheCoord(center.lat, true)}<br>${toGeocacheCoord(center.lng, false)};
+        `${toGeocacheCoord(center.lat, true)}<br>${toGeocacheCoord(center.lng, false)}`;
     }
 
     function distanceInMeters(lat1, lon1, lat2, lon2) {
