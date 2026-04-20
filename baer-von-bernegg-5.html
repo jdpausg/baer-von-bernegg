@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -186,7 +187,7 @@
       margin-bottom: 12px;
     }
 
-    button {
+    button, .next-link {
       display: inline-block;
       padding: 12px 18px;
       border: none;
@@ -198,7 +199,7 @@
       text-decoration: none;
     }
 
-    button:hover {
+    button:hover, .next-link:hover {
       background: #256628;
     }
 
@@ -221,6 +222,12 @@
 
     .fail {
       color: #ff8f8f;
+    }
+
+    #nextPuzzle {
+      display: none;
+      text-align: center;
+      margin-top: 14px;
     }
 
     @media (max-width: 760px) {
@@ -335,6 +342,10 @@
     </div>
 
     <div id="resultBox" class="result-box"></div>
+
+    <div id="nextPuzzle">
+      <a class="next-link" href="baer-von-bernegg-6.html">Weiter zu Rätsel 6</a>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -343,6 +354,7 @@
     const resultBox = document.getElementById("resultBox");
     const checkButton = document.getElementById("checkButton");
     const hintBox = document.getElementById("hintBox");
+    const nextPuzzle = document.getElementById("nextPuzzle");
     const latInput = document.getElementById("latInput");
     const lngInput = document.getElementById("lngInput");
     const applyCoordButton = document.getElementById("applyCoordButton");
@@ -450,6 +462,7 @@
         lastInputAccepted = false;
         resultBox.textContent = "Eingabe nicht erkannt. Bitte im Format N53 00.000 und E010 00.000 eingeben.";
         resultBox.className = "result-box fail";
+        nextPuzzle.style.display = "none";
         return;
       }
 
@@ -482,11 +495,13 @@
       if (lastInputAccepted && exactInputMatch && mapMatches && currentZoom === targetZoom) {
         resultBox.innerHTML = 'Gratulation!!!<br><p><a href="https://coord.info/GC18182" target="_blank" rel="noopener noreferrer">https://coord.info/GC18182</a><br>Gut gemacht!!! Fast geschafft!</p>';
         resultBox.className = "result-box success";
-        hintBox.textContent = "Hinweis: Gut gemacht.";
+        hintBox.textContent = "Hinweis: Gut gemacht. Du kannst jetzt mit Rätsel 6 weitermachen.";
+        nextPuzzle.style.display = "block";
       } else {
         resultBox.textContent = "Noch nicht richtig – Koordinaten müssen exakt stimmen und die Zoomstufe muss 17 sein.";
         resultBox.className = "result-box fail";
         hintBox.textContent = "Hinweis: Verwende Projekt GC zum Herausfinden der Koordinaten.";
+        nextPuzzle.style.display = "none";
       }
     }
 
