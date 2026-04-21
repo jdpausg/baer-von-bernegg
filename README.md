@@ -11,4 +11,4 @@ Die Nutzung dieses Projekts ist ausschließlich im vorgesehenen Rahmen erlaubt. 
 
 Bei Interesse an einer Verwendung oder Übernahme von Inhalten ist vorab Kontakt mit dem Rechteinhaber aufzunehmen.
 
-© 2026 [Dein Name oder Ownername] – Alle Rechte vorbehalten.
+© 2026 TheSaxonyFive – Alle Rechte vorbehalten.
